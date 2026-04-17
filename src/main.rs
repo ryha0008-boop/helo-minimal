@@ -49,7 +49,7 @@ struct Config {
 fn config_path() -> Result<PathBuf> {
     let dirs = ProjectDirs::from("", "", "helo")
         .context("could not determine config directory")?;
-    Ok(dirs.config_dir().join("config.toml"))
+    Ok(dirs.config_dir().join("config.helomin.toml"))
 }
 
 fn load() -> Result<Config> {

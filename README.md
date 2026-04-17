@@ -96,9 +96,9 @@ Blueprints are stored in:
 
 | Platform | Path |
 |----------|------|
-| Windows | `%APPDATA%\helo\config\config.toml` |
-| Linux | `~/.config/helo/config.toml` |
-| macOS | `~/Library/Application Support/helo/config.toml` |
+| Windows | `%APPDATA%\helo\config\config.helomin.toml` |
+| Linux | `~/.config/helo/config.helomin.toml` |
+| macOS | `~/Library/Application Support/helo/config.helomin.toml` |
 
 ## Compared to helo
 
