@@ -70,6 +70,12 @@ helomin add myagent --runtime claude
 helomin add reviewer --runtime opencode
 ```
 
+**Claude only:** add `--permissions bypass` to seed `settings.json` with `bypassPermissions` on first run — skips Claude Code's interactive permission prompts:
+
+```bash
+helomin add myagent --runtime claude --permissions bypass
+```
+
 Blueprints are stored globally in your config directory. Define once, use in any project.
 
 ### 2. Run in a project
