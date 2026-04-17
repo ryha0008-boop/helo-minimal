@@ -7,6 +7,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-04-17
+
+### Added
+- `--permissions bypass` flag for `helomin add` (claude only) — seeds `settings.json` with `{"permissions": {"defaultMode": "bypassPermissions"}}` on first run
+
 ## [0.1.3] — 2026-04-17
 
 ### Changed

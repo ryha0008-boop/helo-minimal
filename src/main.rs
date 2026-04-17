@@ -8,7 +8,7 @@ use std::path::PathBuf;
 #[command(
     name = "helomin",
     version,
-    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\nRuntimes: claude, pi, opencode"
+    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add myagent --runtime claude --permissions bypass\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\nRuntimes: claude, pi, opencode"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -24,6 +24,9 @@ enum Commands {
         /// Runtime: claude, pi, or opencode
         #[arg(long)]
         runtime: String,
+        /// Permission mode: bypass (claude only — sets defaultMode: bypassPermissions in settings.json)
+        #[arg(long)]
+        permissions: Option<String>,
     },
     /// Launch a blueprint in the current directory
     Run {
@@ -38,6 +41,8 @@ enum Commands {
 struct Blueprint {
     name: String,
     runtime: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    permissions: Option<String>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -59,7 +64,7 @@ fn load() -> Result<Config> {
     }
     let text = std::fs::read_to_string(&path)
         .with_context(|| format!("could not read {}", path.display()))?;
-    toml::from_str(&text).context("could not parse config.toml")
+    toml::from_str(&text).context("could not parse config.helomin.toml")
 }
 
 fn save(cfg: &Config) -> Result<()> {
@@ -81,10 +86,24 @@ fn env_dir(runtime: &str, name: &str) -> PathBuf {
     PathBuf::from(format!("{prefix}-{name}"))
 }
 
+fn seed_settings(dir: &std::path::Path, bp: &Blueprint) -> Result<()> {
+    if bp.runtime != "claude" { return Ok(()); }
+    let path = dir.join("settings.json");
+    if path.exists() { return Ok(()); }
+    if bp.permissions.as_deref() == Some("bypass") {
+        std::fs::write(&path, r#"{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+}
+"#).with_context(|| format!("could not write {}", path.display()))?;
+    }
+    Ok(())
+}
+
 fn build_command(runtime: &str, dir: &std::path::Path) -> std::process::Command {
     match runtime {
         "opencode" => {
-            // OPENCODE_CONFIG is a config file path; data (db) is controlled by XDG_DATA_HOME
             let mut c = std::process::Command::new(runtime);
             c.env("OPENCODE_CONFIG", dir.join("opencode.json"));
             c.env("XDG_DATA_HOME", dir.join("data"));
@@ -92,7 +111,6 @@ fn build_command(runtime: &str, dir: &std::path::Path) -> std::process::Command 
         }
         #[cfg(windows)]
         "pi" => {
-            // pi is a .cmd shim on Windows — must be invoked via cmd /c
             let mut c = std::process::Command::new("cmd");
             c.args(["/c", "pi"]);
             c.env("PI_CODING_AGENT_DIR", dir);
@@ -121,12 +139,20 @@ fn main() {
 fn run() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Add { name, runtime } => {
+        Commands::Add { name, runtime, permissions } => {
+            if let Some(ref p) = permissions {
+                if runtime != "claude" {
+                    bail!("--permissions only works with --runtime claude");
+                }
+                if p != "bypass" {
+                    bail!("unknown permission mode '{p}'. Supported: bypass");
+                }
+            }
             let mut cfg = load()?;
             if cfg.blueprints.iter().any(|b| b.name == name) {
                 bail!("blueprint '{name}' already exists");
             }
-            cfg.blueprints.push(Blueprint { name: name.clone(), runtime });
+            cfg.blueprints.push(Blueprint { name: name.clone(), runtime, permissions });
             save(&cfg)?;
             println!("Added '{name}'.");
         }
@@ -137,7 +163,8 @@ fn run() -> Result<()> {
                 println!("No blueprints. Add one: helomin add <name> --runtime <runtime>");
             } else {
                 for bp in &cfg.blueprints {
-                    println!("  {}  ({})", bp.name, bp.runtime);
+                    let perms = bp.permissions.as_deref().map(|p| format!(" [{}]", p)).unwrap_or_default();
+                    println!("  {}  ({}{})", bp.name, bp.runtime, perms);
                 }
             }
         }
@@ -146,12 +173,14 @@ fn run() -> Result<()> {
             let cfg = load()?;
             let bp = cfg.blueprints.iter()
                 .find(|b| b.name == name)
-                .with_context(|| format!("no blueprint named '{name}' — run: helo add {name} --runtime <runtime>"))?;
+                .with_context(|| format!("no blueprint named '{name}' — run: helomin add {name} --runtime <runtime>"))?;
 
             let cwd = std::env::current_dir()?;
             let dir = cwd.join(env_dir(&bp.runtime, &name));
             std::fs::create_dir_all(&dir)
                 .with_context(|| format!("could not create {}", dir.display()))?;
+
+            seed_settings(&dir, bp)?;
 
             let status = build_command(&bp.runtime, &dir)
                 .status()
