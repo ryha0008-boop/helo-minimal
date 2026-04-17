@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "helo-min", version)]
+#[command(name = "helomin", version)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

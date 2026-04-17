@@ -7,6 +7,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-04-17
+
+### Changed
+- Binary renamed from `helo-min` to `helomin` — PowerShell treats hyphens as operators
+
 ## [0.1.2] — 2026-04-17
 
 ### Changed
