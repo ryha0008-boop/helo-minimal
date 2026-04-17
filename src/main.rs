@@ -30,6 +30,8 @@ enum Commands {
         /// Blueprint name
         name: String,
     },
+    /// List all blueprints
+    List,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -127,6 +129,17 @@ fn run() -> Result<()> {
             cfg.blueprints.push(Blueprint { name: name.clone(), runtime });
             save(&cfg)?;
             println!("Added '{name}'.");
+        }
+
+        Commands::List => {
+            let cfg = load()?;
+            if cfg.blueprints.is_empty() {
+                println!("No blueprints. Add one: helomin add <name> --runtime <runtime>");
+            } else {
+                for bp in &cfg.blueprints {
+                    println!("  {}  ({})", bp.name, bp.runtime);
+                }
+            }
         }
 
         Commands::Run { name } => {
