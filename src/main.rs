@@ -75,12 +75,33 @@ fn env_dir(runtime: &str, name: &str) -> PathBuf {
     PathBuf::from(format!("{prefix}-{name}"))
 }
 
-fn isolation_var(runtime: &str) -> &'static str {
+fn build_command(runtime: &str, dir: &std::path::Path) -> std::process::Command {
     match runtime {
-        "claude"   => "CLAUDE_CONFIG_DIR",
-        "pi"       => "PI_CODING_AGENT_DIR",
-        "opencode" => "OPENCODE_CONFIG",
-        _          => "AGENT_CONFIG_DIR",
+        "opencode" => {
+            // OPENCODE_CONFIG is a config file path; data (db) is controlled by XDG_DATA_HOME
+            let mut c = std::process::Command::new(runtime);
+            c.env("OPENCODE_CONFIG", dir.join("opencode.json"));
+            c.env("XDG_DATA_HOME", dir.join("data"));
+            c
+        }
+        #[cfg(windows)]
+        "pi" => {
+            // pi is a .cmd shim on Windows — must be invoked via cmd /c
+            let mut c = std::process::Command::new("cmd");
+            c.args(["/c", "pi"]);
+            c.env("PI_CODING_AGENT_DIR", dir);
+            c
+        }
+        "claude" => {
+            let mut c = std::process::Command::new(runtime);
+            c.env("CLAUDE_CONFIG_DIR", dir);
+            c
+        }
+        other => {
+            let mut c = std::process::Command::new(other);
+            c.env("AGENT_CONFIG_DIR", dir);
+            c
+        }
     }
 }
 
@@ -115,8 +136,7 @@ fn run() -> Result<()> {
             std::fs::create_dir_all(&dir)
                 .with_context(|| format!("could not create {}", dir.display()))?;
 
-            let status = std::process::Command::new(&bp.runtime)
-                .env(isolation_var(&bp.runtime), &dir)
+            let status = build_command(&bp.runtime, &dir)
                 .status()
                 .with_context(|| format!("could not launch '{}' — is it installed and on PATH?", bp.runtime))?;
 
