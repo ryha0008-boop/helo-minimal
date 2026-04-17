@@ -1,6 +1,6 @@
 # helomin
 
-Minimal AI runtime environment manager. Two commands.
+Minimal AI runtime environment manager. Four commands: add, run, list, remove.
 
 Like Python venv, but for AI runtimes — each agent gets its own isolated config directory so multiple agents can run on the same machine without conflicting.
 
@@ -57,7 +57,7 @@ cargo build --release
 
 ## Usage
 
-### 1. Register a blueprint
+### 1. Add — register a blueprint
 
 ```bash
 helomin add <name> --runtime <runtime>
@@ -68,9 +68,10 @@ Runtimes: `claude`, `pi`, `opencode`
 ```bash
 helomin add myagent --runtime claude
 helomin add reviewer --runtime opencode
+helomin add assistant --runtime pi
 ```
 
-**Claude only:** add `--permissions bypass` to seed `settings.json` with `bypassPermissions` on first run — skips Claude Code's interactive permission prompts:
+**`--permissions bypass` (Claude only):** seeds `settings.json` with `bypassPermissions` on first run — skips Claude Code's interactive permission prompts:
 
 ```bash
 helomin add myagent --runtime claude --permissions bypass
@@ -78,7 +79,7 @@ helomin add myagent --runtime claude --permissions bypass
 
 Blueprints are stored globally in your config directory. Define once, use in any project.
 
-### 2. Run in a project
+### 2. Run — launch in a project
 
 ```bash
 cd your-project
@@ -92,9 +93,23 @@ cd my-project
 helomin run myagent    # launches claude with CLAUDE_CONFIG_DIR=.claude-env-myagent/
 ```
 
-### That's it
+### 3. List — show all blueprints
 
-For API keys, provider config, model selection, and everything else — configure them directly inside the env dir or follow the runtime's own documentation. helomin only handles the isolation.
+```bash
+helomin list
+```
+
+### 4. Remove — delete a blueprint
+
+```bash
+helomin remove <name>
+```
+
+Removes the blueprint from the global registry. Does **not** delete any env directories that were created in your projects — those are left untouched.
+
+```bash
+helomin remove myagent
+```
 
 ## Config location
 

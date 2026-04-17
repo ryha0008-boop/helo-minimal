@@ -7,6 +7,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.6] — 2026-04-17
+
+### Added
+- `helomin remove <name>` — removes a blueprint from the registry; does not delete env directories
+
+### Changed
+- README updated to describe all four commands (add, run, list, remove)
+- Tagline updated from "Two commands" to "Four commands: add, run, list, remove"
+
 ## [0.1.5] — 2026-04-17
 
 ### Changed

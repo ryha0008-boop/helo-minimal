@@ -8,7 +8,7 @@ use std::path::PathBuf;
 #[command(
     name = "helomin",
     version,
-    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add myagent --runtime claude --permissions bypass\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\n  helomin list\n\nRuntimes: claude, pi, opencode\n\nFlags:\n  --permissions bypass  Claude only. Seeds settings.json with bypassPermissions on first run,\n                        skipping Claude Code's interactive permission prompts."
+    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add myagent --runtime claude --permissions bypass\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\n  helomin list\n  helomin remove myagent\n\nRuntimes: claude, pi, opencode\n\nFlags:\n  --permissions bypass  Claude only. Seeds settings.json with bypassPermissions on first run,\n                        skipping Claude Code's interactive permission prompts."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -35,6 +35,11 @@ enum Commands {
     },
     /// List all blueprints
     List,
+    /// Remove a blueprint (does not delete env directories)
+    Remove {
+        /// Blueprint name
+        name: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -187,6 +192,17 @@ fn run() -> Result<()> {
                 .with_context(|| format!("could not launch '{}' — is it installed and on PATH?", bp.runtime))?;
 
             std::process::exit(status.code().unwrap_or(1));
+        }
+
+        Commands::Remove { name } => {
+            let mut cfg = load()?;
+            let before = cfg.blueprints.len();
+            cfg.blueprints.retain(|b| b.name != name);
+            if cfg.blueprints.len() == before {
+                bail!("no blueprint named '{name}'");
+            }
+            save(&cfg)?;
+            println!("Removed '{name}'. Env directories (if any) were not deleted.");
         }
     }
     Ok(())
