@@ -8,7 +8,7 @@ use std::path::PathBuf;
 #[command(
     name = "helomin",
     version,
-    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add myagent --runtime claude --permissions bypass\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\n  helomin list\n\nRuntimes: claude, pi, opencode"
+    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add myagent --runtime claude --permissions bypass\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\n  helomin list\n\nRuntimes: claude, pi, opencode\n\nFlags:\n  --permissions bypass  Claude only. Seeds settings.json with bypassPermissions on first run,\n                        skipping Claude Code's interactive permission prompts."
 )]
 struct Cli {
     #[command(subcommand)]
