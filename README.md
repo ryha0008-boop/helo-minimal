@@ -29,12 +29,12 @@ Download the binary for your platform from [Releases](https://github.com/ryha000
 
 ### Windows
 
-```powershell
+```bash
 # Rename and move to a folder in your PATH, e.g. C:\Users\<you>\bin\
 mv helomin-x86_64-windows.exe helomin.exe
-# Move to PATH folder, then verify:
-helomin --version
 ```
+
+> **Note:** Use Git Bash on Windows, not PowerShell. PowerShell may fail to resolve `helomin` as a command even when it's on PATH.
 
 ### Linux / macOS
 
