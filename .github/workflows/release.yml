@@ -34,23 +34,23 @@ jobs:
         include:
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            asset: helo-x86_64-windows.exe
-            binary: target/x86_64-pc-windows-msvc/release/helo.exe
+            asset: helo-min-x86_64-windows.exe
+            binary: target/x86_64-pc-windows-msvc/release/helo-min.exe
 
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            asset: helo-x86_64-linux
-            binary: target/x86_64-unknown-linux-musl/release/helo
+            asset: helo-min-x86_64-linux
+            binary: target/x86_64-unknown-linux-musl/release/helo-min
 
           - os: macos-latest
             target: aarch64-apple-darwin
-            asset: helo-aarch64-macos
-            binary: target/aarch64-apple-darwin/release/helo
+            asset: helo-min-aarch64-macos
+            binary: target/aarch64-apple-darwin/release/helo-min
 
           - os: macos-latest
             target: x86_64-apple-darwin
-            asset: helo-x86_64-macos
-            binary: target/x86_64-apple-darwin/release/helo
+            asset: helo-min-x86_64-macos
+            binary: target/x86_64-apple-darwin/release/helo-min
 
     steps:
       - uses: actions/checkout@v4

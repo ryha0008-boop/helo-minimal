@@ -1,10 +1,10 @@
 [package]
-name = "helo"
-version = "0.1.1"
+name = "helo-min"
+version = "0.1.2"
 edition = "2021"
 
 [[bin]]
-name = "helo"
+name = "helo-min"
 path = "src/main.rs"
 
 [dependencies]
