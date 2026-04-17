@@ -5,7 +5,11 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "helomin", version)]
+#[command(
+    name = "helomin",
+    version,
+    after_help = "Usage:\n  helomin add myagent --runtime claude\n  helomin add reviewer --runtime opencode\n  helomin add assistant --runtime pi\n\n  cd your-project\n  helomin run myagent\n\nRuntimes: claude, pi, opencode"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
